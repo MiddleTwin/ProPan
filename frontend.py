@@ -31,16 +31,26 @@ tab_group = big_form.tabs(["Prompt", "Image Layout", "Images"])
 search_container = tab_group[0].container()
 
 base_prompt = search_container.text_input('Prompt')
-net_prompt = base_prompt
+net_prompt = base_prompt + " -n 1"
 
-with search_container.expander('Advanced details'):
+with search_container:
     common_mods = st.multiselect('Common Modifiers', ['trending on artstation', 'highly detailed', 'award-winning'])
-    net_prompt = net_prompt + " " + " ".join(common_mods)
+    net_prompt += " {}".format(" ".join(common_mods))
+    
     steps = st.number_input("Steps", min_value=1, value=50, help="Fewer is fast, more is usually more detailed")
-    net_prompt = net_prompt + " --steps " + str(steps)
+    net_prompt += " --steps {}".format(steps)
+    
     cfg_scale = st.number_input("Scale", min_value=-7.0, max_value=30.0, help="How closely the AI tries to follow the prompt", value=7.0)
-    net_prompt = net_prompt + " --cfg_scale {:.3f}".format(cfg_scale)
+    net_prompt += " --cfg_scale {:.3f}".format(cfg_scale)
 
+    image_width = int(st.number_input("Width", help="Will be rounded down to a multiple of 32", value=512, min_value=32, key="image_width"))
+    image_width = image_width - (image_width % 32)
+    net_prompt += " --width {}".format(st.session_state.image_width)
+
+    image_height = int(st.number_input("Height", help="Will be rounded down to a multiple of 32", value=512, min_value=32, key="image_height"))
+    image_height = image_height - (image_height % 32)
+    net_prompt += " --height {}".format(image_height)
+    
     st.write('Current prompt: '+ net_prompt)
 
 
@@ -59,6 +69,7 @@ image_container = tab_group[1].container()
 with image_container:
     num_images = int(st.selectbox("Number of images", [i for i in range(1, MAX_IMAGES+1)], index=3))
     num_columns = int(st.selectbox("Number of columns", [1,2,3], index=1))
+    
 image_cols = tab_group[2].columns(num_columns)
 if base_prompt.strip() != '':
     for i in range(num_images):
@@ -70,8 +81,8 @@ if base_prompt.strip() != '':
             seeds[i] = st.session_state[seed_key] if (seed_key in st.session_state and prev_lock_val) else gen_seed()
             
             image_containers[i] = st.empty()
+            #image_containers[i].write("Calling get_image({}, {})".format(net_prompt, seeds[i]))
             image_containers[i].image(LOADING_IMAGE)
-            #st.write("Calling get_image with seed {}".format(seeds[i]))
             seed_locks[i] = st.checkbox("Choose seed", key=lock_key)
             seeds[i] = st.number_input("Current seed", value=seeds[i], key=seed_key, disabled=not seed_locks[i])
     for i in range(num_images):
