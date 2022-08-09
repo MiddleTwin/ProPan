@@ -14,6 +14,7 @@ st.markdown(hide_img_fs, unsafe_allow_html=True)
 
 ##Actual code
 import random
+import json
 from image_getter import get_image
 
 st.title('Prospector\'s Panorama')
@@ -31,11 +32,17 @@ tab_group = big_form.tabs(["Prompt", "Image Layout", "Images"])
 search_container = tab_group[0].container()
 
 base_prompt = search_container.text_input('Prompt')
-net_prompt = base_prompt + " -n 1"
+net_prompt = "'"+base_prompt
 
 with search_container:
-    common_mods = st.multiselect('Common Modifiers', ['trending on artstation', 'highly detailed', 'award-winning'])
-    net_prompt += " {}".format(" ".join(common_mods))
+    configured_mods = []
+    with open("config.json", 'r') as config_file:
+        config_dict = json.load(config_file)
+        configured_mods = config_dict["modifiers"]
+    common_mods = st.multiselect('Common Modifiers', configured_mods)
+    if len(common_mods) > 0:
+        net_prompt += ", {}".format(", ".join(common_mods))
+    net_prompt += "'"
     
     steps = st.number_input("Steps", min_value=1, value=50, help="Fewer is fast, more is usually more detailed")
     net_prompt += " --steps {}".format(steps)
@@ -49,8 +56,8 @@ with search_container:
 
     image_height = int(st.number_input("Height", help="Will be rounded down to a multiple of 32", value=512, min_value=32, key="image_height"))
     image_height = image_height - (image_height % 32)
-    net_prompt += " --height {}".format(image_height)
-    
+    net_prompt += " --height {}".format(image_height) + " -n 1"
+
     st.write('Current prompt: '+ net_prompt)
 
 
