@@ -44,7 +44,7 @@ with search_container:
         net_prompt += ", {}".format(", ".join(common_mods))
     net_prompt += "'"
     
-    steps = st.number_input("Steps", min_value=1, value=50, help="Fewer is fast, more is usually more detailed")
+    steps = st.number_input("Steps", min_value=1, value=50, max_value=50, help="Fewer is fast, more is usually more detailed")
     net_prompt += " --steps {}".format(steps)
     
     cfg_scale = st.number_input("Scale", min_value=-7.0, max_value=30.0, help="How closely the AI tries to follow the prompt", value=7.0)
