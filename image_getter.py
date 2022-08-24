@@ -35,12 +35,13 @@ def load_model_from_config(config, ckpt, verbose=False):
     return model
 
 #basically follow what they do in the example script, return PIL.Image
-@st.cache(ttl=30*60)
+#@st.cache(ttl=30*60)
 def text_to_image(prompt, steps, image_height, image_width, scale, seed):
     seed_everything(seed)
-    config = OmegaConf.load(PATH_TO_CONFIG)
+    config = OmegaConf.load("configs/v1-inference.yaml")
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    model = load_model_from_config(config, "sd-v1-4.ckpt")
     model = model.to(device)    
 
     sampler = DDIMSampler(model)
