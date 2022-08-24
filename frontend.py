@@ -68,7 +68,7 @@ MAX_IMAGES = 9
 LOADING_IMAGE = "Loading.png"
 #seeds are always stored on a MAX_IMAGES basis in case someone accidentally lowers the amount of images and then increases it again
 def gen_seed():
-    return random.randint(0, 2**50-1)
+    return random.randint(0, 4294967295)
 seed_locks = [False] * MAX_IMAGES
 seeds = [0] * MAX_IMAGES
 image_containers = [None] * 9

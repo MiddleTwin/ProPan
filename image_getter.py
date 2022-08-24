@@ -17,8 +17,13 @@ def get_image(prompt, seed=1):
     return "ai_pan.png"
 
 # Copied from https://github.com/CompVis/stable-diffusion/blob/ce05de28194041e030ccfc70c635fe3707cdfc30/scripts/txt2img.py#
-def load_model_from_config(config, ckpt, verbose=False):
+def load_model_from_config(ckpt,verbose=False):
+    if 'model' in st.session_state:
+        return st.session_state['model']
+    
+    config = OmegaConf.load("configs/v1-inference.yaml")
     print(f"Loading model from {ckpt}")
+    
     pl_sd = torch.load(ckpt, map_location="cpu")
     if "global_step" in pl_sd:
         print(f"Global Step: {pl_sd['global_step']}")
@@ -34,17 +39,17 @@ def load_model_from_config(config, ckpt, verbose=False):
 
     model.cuda()
     model.eval()
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    model = model.to(device)
+    st.session_state['model'] = model
     return model
 
 #basically follow what they do in the example script, return PIL.Image
-#@st.cache(ttl=30*60)
+@st.cache(ttl=30*60)
 def text_to_image(prompt, steps, image_height, image_width, scale, seed):
     seed_everything(seed)
-    config = OmegaConf.load("configs/v1-inference.yaml")
 
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    model = load_model_from_config(config, "sd-v1-4.ckpt")
-    model = model.to(device)    
+    model = load_model_from_config("sd-v1-4.ckpt")
 
     sampler = DDIMSampler(model)
     batch_size = 1
