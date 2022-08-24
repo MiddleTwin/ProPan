@@ -15,7 +15,7 @@ st.markdown(hide_img_fs, unsafe_allow_html=True)
 ##Actual code
 import random
 import json
-from image_getter import get_image
+from image_getter import get_image, text_to_image
 
 st.title('Prospector\'s Panorama')
 
@@ -45,18 +45,18 @@ with search_container:
     net_prompt += "'"
     
     steps = st.number_input("Steps", min_value=1, value=50, max_value=50, help="Fewer is fast, more is usually more detailed")
-    net_prompt += " --steps {}".format(steps)
+    # net_prompt += " --steps {}".format(steps)
     
     cfg_scale = st.number_input("Scale", min_value=-7.0, max_value=30.0, help="How closely the AI tries to follow the prompt", value=7.0)
-    net_prompt += " --cfg_scale {:.3f}".format(cfg_scale)
+    #v net_prompt += " --cfg_scale {:.3f}".format(cfg_scale)
 
     image_width = int(st.number_input("Width", help="Will be rounded down to a multiple of 32", value=512, min_value=32, key="image_width"))
     image_width = image_width - (image_width % 32)
-    net_prompt += " --width {}".format(st.session_state.image_width)
+    # net_prompt += " --width {}".format(st.session_state.image_width)
 
     image_height = int(st.number_input("Height", help="Will be rounded down to a multiple of 32", value=512, min_value=32, key="image_height"))
     image_height = image_height - (image_height % 32)
-    net_prompt += " --height {}".format(image_height) + " -n 1"
+    # net_prompt += " --height {}".format(image_height) + " -n 1"
 
     st.write('Current prompt: '+ net_prompt)
 
@@ -94,7 +94,7 @@ if base_prompt.strip() != '':
             seeds[i] = st.number_input("Current seed", value=seeds[i], key=seed_key, disabled=not seed_locks[i])
     for i in range(num_images):
         with image_cols[i % num_columns]:
-            image_containers[i].image(get_image(net_prompt, seeds[i]), width=None)
+            image_containers[i].image(text_to_image(net_prompt, steps, image_height, image_width, cfg_scale, seeds[i]), width=None)
 
 about_section = st.container()
 about_section.expander("About").markdown("""
