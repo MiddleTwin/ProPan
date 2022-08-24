@@ -8,6 +8,7 @@ from omegaconf import OmegaConf
 from PIL import Image
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
+from tqdm import tqdm, trange
 
 @st.cache(ttl=30*60)
 def get_image(prompt, seed=1):
@@ -64,7 +65,7 @@ def text_to_image(prompt, steps, image_height, image_width, scale, seed):
                         if isinstance(prompts, tuple):
                             prompts = list(prompts)
                         c = model.get_learned_conditioning(prompts)
-                        shape = [opt.C, opt.H // opt.f, opt.W // opt.f]
+                        shape = [4, image_height // 8, image_width // 8]
                         samples_ddim, _ = sampler.sample(S=steps,
                                                          conditioning=c,
                                                          batch_size=1,
